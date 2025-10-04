@@ -4,19 +4,31 @@ server:
 spring:
   application:
     name: api-gateway
-
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            exposedHeaders: "*"
+            allowCredentials: true
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
 app:
   internal:
-    secret:${INTERNAL_SECRET:123}
+    secret: ${INTERNAL_SECRET:123}
   jwt:
     secret: ${JWT_SECRET}
