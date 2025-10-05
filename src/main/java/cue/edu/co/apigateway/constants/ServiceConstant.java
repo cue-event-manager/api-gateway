@@ -18,6 +18,9 @@ public final class ServiceConstant {
 
     public static final String[] PUBLIC_ENDPOINTS = {
             "/auth-service/api/auth/login",
+            "/auth-service/api/auth/refresh",
+            "/auth-service/api/auth/logout",
+
     };
 
 }
