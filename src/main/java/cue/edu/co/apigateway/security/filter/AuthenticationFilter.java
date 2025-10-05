@@ -24,7 +24,7 @@ public class AuthenticationFilter implements GatewayFilter {
 
     public AuthenticationFilter(JwtUtil jwtUtil,
                                 AuthErrorHandler errorHandler,
-                                @Value("app.internal.secret")
+                                @Value("${app.internal.secret}")
                                 String secret
                                 ) {
         this.jwtUtil = jwtUtil;
@@ -37,8 +37,11 @@ public class AuthenticationFilter implements GatewayFilter {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
+        ServerHttpRequest.Builder requestBuilder = request.mutate()
+                .header(ServiceConstant.GATEWAY_INTERNAL_HEADER, GATEWAY_INTERNAL_SECRET);
+
         if (Arrays.stream(ServiceConstant.PUBLIC_ENDPOINTS).anyMatch(path::startsWith)) {
-            return chain.filter(exchange);
+            return chain.filter(exchange.mutate().request(requestBuilder.build()).build());
         }
 
         String authHeader = request.getHeaders().getFirst(ServiceConstant.AUTH_HEADER);
@@ -54,10 +57,9 @@ public class AuthenticationFilter implements GatewayFilter {
                 return errorHandler.handleError(exchange, HttpStatus.UNAUTHORIZED, "Token expired");
             }
 
-            ServerHttpRequest modifiedRequest = request.mutate()
+            ServerHttpRequest modifiedRequest = requestBuilder
                     .header("X-User-Id", String.valueOf(jwtUtil.getUserId(claims)))
                     .header("X-User-Role", jwtUtil.getRole(claims))
-                    .header(ServiceConstant.GATEWAY_INTERNAL_HEADER, GATEWAY_INTERNAL_SECRET)
                     .build();
 
             return chain.filter(exchange.mutate().request(modifiedRequest).build());
@@ -66,4 +68,5 @@ public class AuthenticationFilter implements GatewayFilter {
             return errorHandler.handleError(exchange, HttpStatus.UNAUTHORIZED, "Invalid or malformed token");
         }
     }
+
 }

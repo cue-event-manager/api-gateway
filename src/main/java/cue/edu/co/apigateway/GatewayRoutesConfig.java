@@ -22,17 +22,17 @@ public class GatewayRoutesConfig {
 
                 .route(ServiceConstant.AUTH_SERVICE,
                         r -> r.path(ServiceConstant.AUTH_BASE_PATH)
-                                .filters(f -> f.stripPrefix(1).filter(jwtFilter))
+                                .filters(f -> f.filter(jwtFilter).stripPrefix(1))
                                 .uri("lb://" + ServiceConstant.AUTH_SERVICE))
 
                 .route(ServiceConstant.EVENT_SERVICE,
                         r -> r.path(ServiceConstant.EVENT_BASE_PATH)
-                                .filters(f -> f.stripPrefix(1).filter(jwtFilter))
+                                .filters(f -> f.filter(jwtFilter).stripPrefix(1))
                                 .uri("lb://" + ServiceConstant.EVENT_SERVICE))
 
                 .route(ServiceConstant.ACADEMIC_SERVICE,
                         r -> r.path(ServiceConstant.ACADEMIC_BASE_PATH)
-                                .filters(f -> f.stripPrefix(1).filter(jwtFilter))
+                                .filters(f -> f.filter(jwtFilter).stripPrefix(1))
                                 .uri("lb://" + ServiceConstant.ACADEMIC_SERVICE))
 
                 .build();

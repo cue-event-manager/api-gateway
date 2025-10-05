@@ -17,7 +17,7 @@ public final class ServiceConstant {
     public static final String BEARER_PREFIX = "Bearer ";
 
     public static final String[] PUBLIC_ENDPOINTS = {
-            "/api/auth/login",
+            "/auth-service/api/auth/login",
     };
 
 }
