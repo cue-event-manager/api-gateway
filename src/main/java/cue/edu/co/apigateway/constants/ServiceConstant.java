@@ -4,12 +4,14 @@ public final class ServiceConstant {
     private ServiceConstant() {}
 
     public static final String AUTH_SERVICE = "cue-event-manager-auth-service";
-    public static final String EVENT_SERVICE = "event-service";
-    public static final String ACADEMIC_SERVICE = "academic-service";
+    public static final String EVENT_SERVICE = "cue-event-manager-event-service";
+    public static final String ACADEMIC_SERVICE = "cue-event-manager-academic-service";
+    public static final String SPACE_SERVICE = "cue-event-manager-space-service";
 
     public static final String AUTH_BASE_PATH = "/auth-service/**";
     public static final String EVENT_BASE_PATH = "/event-service/**";
     public static final String ACADEMIC_BASE_PATH = "/academic-service/**";
+    public static final String SPACE_BASE_PATH = "/space-service/**";
 
     public static final String GATEWAY_INTERNAL_HEADER = "X-Gateway-Secret";
 
