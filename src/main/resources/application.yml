@@ -31,4 +31,4 @@ app:
   internal:
     secret: ${INTERNAL_SECRET:123}
   jwt:
-    secret: ${JWT_SECRET}
+    secret: ${JWT_SECRET:default_secret}

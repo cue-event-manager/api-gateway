@@ -22,7 +22,8 @@ public final class ServiceConstant {
             "/auth-service/api/auth/login",
             "/auth-service/api/auth/refresh",
             "/auth-service/api/auth/logout",
-
+            "/auth-service/api/auth/recover-password",
+            "/auth-service/api/auth/reset-password",
     };
 
 }
