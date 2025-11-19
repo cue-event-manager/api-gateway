@@ -38,6 +38,10 @@ public class GatewayRoutesConfig {
                         r -> r.path(ServiceConstant.SPACE_BASE_PATH)
                                 .filters(f -> f.filter(jwtFilter).stripPrefix(1))
                                 .uri("lb://" + ServiceConstant.SPACE_SERVICE))
+                .route(ServiceConstant.SPACE_SERVICE,
+                        r -> r.path(ServiceConstant.FILE_BASE_PATH)
+                                .filters(f -> f.filter(jwtFilter).stripPrefix(1))
+                                .uri("lb://" + ServiceConstant.FILE_SERVICE))
                 .build();
     }
 }
