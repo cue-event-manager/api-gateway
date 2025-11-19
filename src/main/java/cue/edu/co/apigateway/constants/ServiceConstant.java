@@ -7,11 +7,13 @@ public final class ServiceConstant {
     public static final String EVENT_SERVICE = "cue-event-manager-event-service";
     public static final String ACADEMIC_SERVICE = "cue-event-manager-academic-service";
     public static final String SPACE_SERVICE = "cue-event-manager-space-service";
+    public static final String FILE_SERVICE = "cue-event-manager-file-service";
 
     public static final String AUTH_BASE_PATH = "/auth-service/**";
     public static final String EVENT_BASE_PATH = "/event-service/**";
     public static final String ACADEMIC_BASE_PATH = "/academic-service/**";
     public static final String SPACE_BASE_PATH = "/space-service/**";
+    public static final String FILE_BASE_PATH = "/file-service/**";
 
     public static final String GATEWAY_INTERNAL_HEADER = "X-Gateway-Secret";
 
@@ -24,6 +26,9 @@ public final class ServiceConstant {
             "/auth-service/api/auth/logout",
             "/auth-service/api/auth/recover-password",
             "/auth-service/api/auth/reset-password",
+            "/event-service/api/events",
+            "/event-service/api/event-categories/all",
+            "/event-service/api/event-modalities/all"
     };
 
 }
