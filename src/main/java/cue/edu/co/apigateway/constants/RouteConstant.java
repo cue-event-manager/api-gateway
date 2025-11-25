@@ -5,16 +5,24 @@ import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
-public class PublicRouteConstant {
-    public static final List<RouteRule> ROUTES = List.of(
-            new RouteRule("/auth-service/api/auth/login", HttpMethod.POST),
-            new RouteRule("/auth-service/api/auth/refresh", HttpMethod.POST),
-            new RouteRule("/auth-service/api/auth/logout", HttpMethod.POST),
-            new RouteRule("/auth-service/api/auth/recover-password", HttpMethod.POST),
-            new RouteRule("/auth-service/api/auth/reset-password", HttpMethod.POST),
 
-            new RouteRule("/event-service/api/events", HttpMethod.GET),
-            new RouteRule("/event-service/api/event-categories/all", HttpMethod.GET),
-            new RouteRule("/event-service/api/event-modalities/all", HttpMethod.GET)
+public class RouteConstant {
+
+    public static final List<RouteRule> PUBLIC_ROUTES = List.of(
+            new RouteRule(HttpMethod.POST, "/auth-service/api/auth/login", false),
+            new RouteRule(HttpMethod.POST, "/auth-service/api/auth/refresh", false),
+            new RouteRule(HttpMethod.POST, "/auth-service/api/auth/logout", false),
+            new RouteRule(HttpMethod.POST, "/auth-service/api/auth/recover-password", false),
+            new RouteRule(HttpMethod.POST, "/auth-service/api/auth/reset-password", false),
+
+            new RouteRule(HttpMethod.GET, "/event-service/api/events", false),
+            new RouteRule(HttpMethod.GET, "/event-service/api/event-categories/all", false),
+            new RouteRule(HttpMethod.GET, "/event-service/api/event-modalities/all", false),
+
+            new RouteRule(HttpMethod.GET, "^/event-service/api/events/\\d+$", true)
+    );
+
+    public static final List<RouteRule> PRIVATE_ROUTES = List.of(
+            new RouteRule(HttpMethod.GET, "/event-service/api/events/my", false)
     );
 }
