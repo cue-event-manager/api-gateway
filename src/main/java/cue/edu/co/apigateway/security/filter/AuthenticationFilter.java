@@ -37,8 +37,10 @@ public class AuthenticationFilter implements GatewayFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         ServerHttpRequest request = exchange.getRequest();
-        ServerHttpRequest.Builder builder = request.mutate()
-                .header(ServiceConstant.GATEWAY_INTERNAL_HEADER, internalSecret);
+
+        ServerHttpRequest.Builder builder = request.mutate();
+        builder.header(ServiceConstant.GATEWAY_INTERNAL_HEADER, internalSecret);
+
         enrichUserIfAuthenticated(request, builder);
 
         if (isPublicRoute(request)) {
@@ -52,7 +54,6 @@ public class AuthenticationFilter implements GatewayFilter {
 
         return chain.filter(exchange.mutate().request(builder.build()).build());
     }
-
 
 
     private boolean isPublicRoute(ServerHttpRequest request) {
