@@ -35,59 +35,37 @@ public class AuthenticationFilter implements GatewayFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
         ServerHttpRequest request = exchange.getRequest();
-
         ServerHttpRequest.Builder builder = request.mutate();
+
         builder.header(ServiceConstant.GATEWAY_INTERNAL_HEADER, internalSecret);
 
-        enrichUserIfAuthenticated(request, builder);
+
+        boolean isValidToken = tryAuthenticateAndEnrich(request, builder);
+
+        ServerHttpRequest modifiedRequest = builder.build();
+        ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
 
         if (isPublicRoute(request)) {
-            return chain.filter(exchange.mutate().request(builder.build()).build());
+            return chain.filter(modifiedExchange);
         }
 
-        if (!isAuthenticated(request, builder)) {
-            return errorHandler.handleError(exchange, HttpStatus.UNAUTHORIZED,
-                    "Missing or invalid Authorization header");
+        if (!isValidToken) {
+            return errorHandler.handleError(modifiedExchange, HttpStatus.UNAUTHORIZED,
+                    "Access denied. Authentication required.");
         }
 
-        return chain.filter(exchange.mutate().request(builder.build()).build());
+        return chain.filter(modifiedExchange);
     }
 
-
-    private boolean isPublicRoute(ServerHttpRequest request) {
-        RouteConstant PublicRouteConstant;
-        return RouteConstant.PUBLIC_ROUTES.stream()
-                .anyMatch(rule -> RouteMatcher.matches(request, rule));
-    }
-
-    private boolean isPrivateRoute(ServerHttpRequest request) {
-        return RouteConstant.PRIVATE_ROUTES.stream()
-                .anyMatch(rule -> RouteMatcher.matches(request, rule));
-    }
-
-    private void enrichUserIfAuthenticated(ServerHttpRequest request,
-                                           ServerHttpRequest.Builder builder) {
+    /**
+     * Attempts to extract, validate, and enrich the request with user headers.
+     * @return true if a valid, unexpired token was found and headers were added, false otherwise.
+     */
+    private boolean tryAuthenticateAndEnrich(ServerHttpRequest request,
+                                             ServerHttpRequest.Builder builder) {
 
         String authHeader = request.getHeaders().getFirst(ServiceConstant.AUTH_HEADER);
-        if (authHeader == null || !authHeader.startsWith(ServiceConstant.BEARER_PREFIX)) return;
-
-        try {
-            String token = authHeader.substring(ServiceConstant.BEARER_PREFIX.length());
-            var claims = jwtUtil.validateToken(token);
-
-            if (!jwtUtil.isExpired(claims)) {
-                builder.header(ServiceConstant.USER_ID_HEADER, String.valueOf(jwtUtil.getUserId(claims)));
-                builder.header(ServiceConstant.USER_ROLE_HEADER, jwtUtil.getRole(claims));
-            }
-        } catch (JwtException ignored) {}
-    }
-
-    private boolean isAuthenticated(ServerHttpRequest request,
-                                    ServerHttpRequest.Builder builder) {
-        String authHeader = request.getHeaders().getFirst(ServiceConstant.AUTH_HEADER);
-
         if (authHeader == null || !authHeader.startsWith(ServiceConstant.BEARER_PREFIX)) {
             return false;
         }
@@ -102,8 +80,15 @@ public class AuthenticationFilter implements GatewayFilter {
             builder.header(ServiceConstant.USER_ROLE_HEADER, jwtUtil.getRole(claims));
             return true;
 
-        } catch (JwtException e) {
+        } catch (JwtException ignored) {
             return false;
         }
     }
+
+    private boolean isPublicRoute(ServerHttpRequest request) {
+
+        return RouteConstant.PUBLIC_ROUTES.stream()
+                .anyMatch(rule -> RouteMatcher.matches(request, rule));
+    }
+
 }
