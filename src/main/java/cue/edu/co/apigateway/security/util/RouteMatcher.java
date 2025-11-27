@@ -6,7 +6,9 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 public class RouteMatcher {
 
     public static boolean matches(ServerHttpRequest request, RouteRule rule) {
-        if (!request.getMethod().equals(rule.method())) return false;
+        if (!request.getMethod().equals(rule.method())) {
+            return false;
+        }
 
         String path = request.getURI().getPath();
 
@@ -14,6 +16,7 @@ public class RouteMatcher {
             return path.matches(rule.pattern());
         }
 
-        return path.startsWith(rule.pattern());
+
+        return path.equals(rule.pattern());
     }
 }
