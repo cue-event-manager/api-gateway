@@ -40,8 +40,22 @@ public class AuthenticationFilter implements GatewayFilter {
 
         builder.header(ServiceConstant.GATEWAY_INTERNAL_HEADER, internalSecret);
 
+        String authHeader = request.getHeaders().getFirst(ServiceConstant.AUTH_HEADER);
+        boolean hasAuthHeader = authHeader != null && authHeader.startsWith(ServiceConstant.BEARER_PREFIX);
 
-        boolean isValidToken = tryAuthenticateAndEnrich(request, builder);
+        boolean isValidToken = false;
+
+        if (hasAuthHeader) {
+            isValidToken = authenticateAndEnrich(authHeader, builder);
+
+            if (!isValidToken) {
+                if (isAuthRoute(request)) {
+                    return chain.filter(exchange.mutate().request(builder.build()).build());
+                }
+                return errorHandler.handleError(exchange, HttpStatus.UNAUTHORIZED,
+                        "Token expired or invalid");
+            }
+        }
 
         ServerHttpRequest modifiedRequest = builder.build();
         ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
@@ -58,18 +72,7 @@ public class AuthenticationFilter implements GatewayFilter {
         return chain.filter(modifiedExchange);
     }
 
-    /**
-     * Attempts to extract, validate, and enrich the request with user headers.
-     * @return true if a valid, unexpired token was found and headers were added, false otherwise.
-     */
-    private boolean tryAuthenticateAndEnrich(ServerHttpRequest request,
-                                             ServerHttpRequest.Builder builder) {
-
-        String authHeader = request.getHeaders().getFirst(ServiceConstant.AUTH_HEADER);
-        if (authHeader == null || !authHeader.startsWith(ServiceConstant.BEARER_PREFIX)) {
-            return false;
-        }
-
+    private boolean authenticateAndEnrich(String authHeader, ServerHttpRequest.Builder builder) {
         try {
             String token = authHeader.substring(ServiceConstant.BEARER_PREFIX.length());
             var claims = jwtUtil.validateToken(token);
@@ -80,15 +83,19 @@ public class AuthenticationFilter implements GatewayFilter {
             builder.header(ServiceConstant.USER_ROLE_HEADER, jwtUtil.getRole(claims));
             return true;
 
-        } catch (JwtException ignored) {
+        } catch (JwtException e) {
             return false;
         }
     }
 
     private boolean isPublicRoute(ServerHttpRequest request) {
-
         return RouteConstant.PUBLIC_ROUTES.stream()
                 .anyMatch(rule -> RouteMatcher.matches(request, rule));
     }
 
+    private boolean isAuthRoute(ServerHttpRequest request) {
+        return RouteConstant.PUBLIC_ROUTES.stream()
+                .filter(rule -> rule.pattern().contains("/auth/"))
+                .anyMatch(rule -> RouteMatcher.matches(request, rule));
+    }
 }
